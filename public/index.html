@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Arbitragem Cripto</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Fonte -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #000;
+      --card: #0a0a0a;
+      --gold: #facc15;
+      --success: #22c55e;
+      --text: #fafafa;
+      --muted: #a3a3a3;
+      --border: #1f1f1f;
+    }
+
+    body {
+      margin: 0;
+      padding: 32px;
+      font-family: 'Manrope', sans-serif;
+      background: radial-gradient(circle at top, #111, #000);
+      color: var(--text);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    p {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+
+    #cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #0a0a0a, #050505);
+      border-radius: 18px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: 0 20px 40px rgba(0,0,0,.8);
+    }
+
+    .card-header {
+      color: var(--gold);
+      font-weight: 600;
+      margin-bottom: 14px;
+      font-size: 16px;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .card-row small {
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .arrow {
+      opacity: .4;
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .positive {
+      color: var(--success);
+      font-weight: 600;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg, #facc15, #eab308);
+      font-weight: 700;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🔥 Oportunidades</h1>
+  <p>Arbitragem cripto em tempo real</p>
+
+  <div id="cards"></div>
+
+<script>
+/* CONFIG */
+const pairs = ['BTC', 'ETH'];
+const fees = { Binance: 0.10, Coinbase: 0.50, Kraken: 0.26 };
+const MIN_PROFIT = 0.3;
+
+/* APIS */
+async function getBinance(symbol) {
+  const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}USDT`);
+  return parseFloat((await r.json()).price);
+}
+
+async function getCoinbase(symbol) {
+  const r = await fetch(`https://api.coinbase.com/v2/prices/${symbol}-USD/spot`);
+  return parseFloat((await r.json()).data.amount);
+}
+
+async function getKraken(symbol) {
+  const map = { BTC: 'XXBTZUSD', ETH: 'XETHZUSD' };
+  if (!map[symbol]) return null;
+  const r = await fetch(`https://api.kraken.com/0/public/Ticker?pair=${map[symbol]}`);
+  const d = await r.json();
+  return parseFloat(d.result[Object.keys(d.result)[0]].c[0]);
+}
+
+/* MAIN */
+async function loadData() {
+  const cards = document.getElementById('cards');
+  cards.innerHTML = '';
+
+  try {
+    const r = await fetch('https://https://arbitragem-cripto-backend-production.up.railway.app/arbitragem');
+    const data = await r.json();
+
+    if (data.length === 0) {
+      cards.innerHTML = '<p style="text-align:center;color:#a3a3a3">Nenhuma oportunidade no momento</p>';
+      return;
+    }
+
+    data.forEach(item => {
+      cards.innerHTML += `
+        <div class="card">
+          <div class="card-header">${item.pair}</div>
+
+          <div class="card-row">
+            <div>
+              <small>Comprar</small>
+              ${item.buy.name}<br>$${item.buy.price.toFixed(2)}
+            </div>
+            <div class="arrow">→</div>
+            <div>
+              <small>Vender</small>
+              ${item.sell.name}<br>$${item.sell.price.toFixed(2)}
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div>
+              <small>Spread</small>
+              <div class="positive">${item.spread.toFixed(2)}%</div>
+            </div>
+            <div>
+              <small>Lucro real</small>
+              <div class="positive">${item.profit.toFixed(2)}%</div>
+            </div>
+          </div>
+
+          <button>Order Book</button>
+        </div>
+      `;
+    });
+  } catch (err) {
+    cards.innerHTML = '<p style="text-align:center;color:red">Erro ao conectar com o backend</p>';
+  }
+}
+loadData();
+setInterval(loadData, 15000);
+</script>
+</body>
+</html>
