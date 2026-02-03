@@ -35,8 +35,7 @@ const exchanges = [
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.binance.com/api/v3/ticker/price?symbol=${pair}USDT`
-      );
+        `https://api.binance.com/api/v3/ticker/price?symbol=${pair}USDT`, { timeout: 5000 });
       return parseFloat(r.data.price);
     }
   },
@@ -45,8 +44,7 @@ const exchanges = [
     fee: 0.50,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.coinbase.com/v2/prices/${pair}-USD/spot`
-      );
+        `https://api.coinbase.com/v2/prices/${pair}-USD/spot`, { timeout: 5000 });
       return parseFloat(r.data.data.amount);
     }
   },
@@ -55,8 +53,7 @@ const exchanges = [
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`
-      );
+        `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`, { timeout: 5000 });
       return parseFloat(r.data.result.list[0].lastPrice);
     }
   },
@@ -65,8 +62,7 @@ const exchanges = [
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${pair}-USDT`
-      );
+        `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${pair}-USDT`, { timeout: 5000 });
       return parseFloat(r.data.data.price);
     }
   },
@@ -75,8 +71,7 @@ const exchanges = [
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`
-      );
+        `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`, { timeout: 5000 });
       return parseFloat(r.data.data[0].last);
     }
   },
@@ -99,8 +94,7 @@ const exchanges = [
       if (!map[pair]) return null;
 
       const r = await axios.get(
-        `https://api.kraken.com/0/public/Ticker?pair=${map[pair]}`
-      );
+        `https://api.kraken.com/0/public/Ticker?pair=${map[pair]}`, { timeout: 5000 });
       return parseFloat(
         r.data.result[Object.keys(r.data.result)[0]].c[0]
       );
