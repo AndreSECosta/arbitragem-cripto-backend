@@ -8,7 +8,24 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ===== CONFIG =====
-const PAIRS = ['BTC', 'ETH'];
+const PAIRS = [
+  'BTC',
+  'ETH',
+  'SOL',
+  'XRP',
+  'ADA',
+  'AVAX',
+  'DOGE',
+  'LINK',
+  'MATIC',
+  'LTC',
+  'TRX',
+  'DOT',
+  'ATOM',
+  'BNB',
+  'UNI'
+];
+
 const MIN_PROFIT = 0.3;
 
 // ===== EXCHANGES =====
@@ -67,7 +84,18 @@ const exchanges = [
     name: 'Kraken',
     fee: 0.26,
     getPrice: async (pair) => {
-      const map = { BTC: 'XXBTZUSD', ETH: 'XETHZUSD' };
+      const map = {
+  BTC: 'XXBTZUSD',
+  ETH: 'XETHZUSD',
+  SOL: 'SOLUSD',
+  XRP: 'XXRPZUSD',
+  ADA: 'ADAUSD',
+  DOT: 'DOTUSD',
+  ATOM: 'ATOMUSD',
+  LTC: 'XLTCZUSD',
+  DOGE: 'XDGUSD'
+};
+
       if (!map[pair]) return null;
 
       const r = await axios.get(
