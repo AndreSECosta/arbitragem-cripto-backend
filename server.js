@@ -46,86 +46,99 @@ const exchanges = [
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.binance.com/api/v3/ticker/price?symbol=${pair}USDT`, { timeout: 5000 });
+        `https://api.binance.com/api/v3/ticker/price?symbol=${pair}USDT`,
+        { timeout: 5000 }
+      );
       return parseFloat(r.data.price);
     }
   },
+
   {
     name: 'Coinbase',
     fee: 0.50,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.coinbase.com/v2/prices/${pair}-USD/spot`, { timeout: 5000 });
+        `https://api.coinbase.com/v2/prices/${pair}-USD/spot`,
+        { timeout: 5000 }
+      );
       return parseFloat(r.data.data.amount);
     }
   },
+
   {
-    {
-  name: 'Bybit',
-  fee: 0.10,
-  getPrice: async (pair) => {
-    const r = await axios.get(
-      `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`,
-      { timeout: 5000 }
-    );
+    name: 'Bybit',
+    fee: 0.10,
+    getPrice: async (pair) => {
+      const r = await axios.get(
+        `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`,
+        { timeout: 5000 }
+      );
 
-    const list = r.data?.result?.list;
-    if (!list || list.length === 0) return null;
+      const list = r.data?.result?.list;
+      if (!list || list.length === 0) return null;
 
-    return parseFloat(list[0].lastPrice);
-  }
-},
+      return parseFloat(list[0].lastPrice);
+    }
+  },
+
   {
     name: 'KuCoin',
     fee: 0.10,
     getPrice: async (pair) => {
       const r = await axios.get(
-        `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${pair}-USDT`, { timeout: 5000 });
+        `https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${pair}-USDT`,
+        { timeout: 5000 }
+      );
       return parseFloat(r.data.data.price);
     }
   },
+
   {
-    {
-  name: 'OKX',
-  fee: 0.10,
-  getPrice: async (pair) => {
-    const r = await axios.get(
-      `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`,
-      { timeout: 5000 }
-    );
+    name: 'OKX',
+    fee: 0.10,
+    getPrice: async (pair) => {
+      const r = await axios.get(
+        `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`,
+        { timeout: 5000 }
+      );
 
-    const data = r.data?.data;
-    if (!data || data.length === 0) return null;
+      const data = r.data?.data;
+      if (!data || data.length === 0) return null;
 
-    return parseFloat(data[0].last);
-  }
-},
+      return parseFloat(data[0].last);
+    }
+  },
+
   {
     name: 'Kraken',
     fee: 0.26,
     getPrice: async (pair) => {
       const map = {
-  BTC: 'XXBTZUSD',
-  ETH: 'XETHZUSD',
-  SOL: 'SOLUSD',
-  XRP: 'XXRPZUSD',
-  ADA: 'ADAUSD',
-  DOT: 'DOTUSD',
-  ATOM: 'ATOMUSD',
-  LTC: 'XLTCZUSD',
-  DOGE: 'XDGUSD'
-};
+        BTC: 'XXBTZUSD',
+        ETH: 'XETHZUSD',
+        SOL: 'SOLUSD',
+        XRP: 'XXRPZUSD',
+        ADA: 'ADAUSD',
+        DOT: 'DOTUSD',
+        ATOM: 'ATOMUSD',
+        LTC: 'XLTCZUSD',
+        DOGE: 'XDGUSD'
+      };
 
       if (!map[pair]) return null;
 
       const r = await axios.get(
-        `https://api.kraken.com/0/public/Ticker?pair=${map[pair]}`, { timeout: 5000 });
+        `https://api.kraken.com/0/public/Ticker?pair=${map[pair]}`,
+        { timeout: 5000 }
+      );
+
       return parseFloat(
         r.data.result[Object.keys(r.data.result)[0]].c[0]
       );
     }
   }
 ];
+
 
 // ===== FUNÇÃO DE PREÇOS =====
 async function getPrices(pair) {
