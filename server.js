@@ -152,7 +152,9 @@ app.get('/arbitragem', async (req, res) => {
       }
     }
 
+    opportunities.sort((a, b) => b.profit - a.profit);
     res.json(opportunities);
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Erro no backend' });
