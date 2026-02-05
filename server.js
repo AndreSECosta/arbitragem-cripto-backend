@@ -14,6 +14,9 @@ let cache = {
 
 const CACHE_TIME = 30 * 1000; // 30 segundos
 
+let history = [];
+const MAX_HISTORY = 100;
+
 
 // ===== CONFIG =====
 const PAIRS = [
@@ -57,14 +60,21 @@ const exchanges = [
     }
   },
   {
-    name: 'Bybit',
-    fee: 0.10,
-    getPrice: async (pair) => {
-      const r = await axios.get(
-        `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`, { timeout: 5000 });
-      return parseFloat(r.data.result.list[0].lastPrice);
-    }
-  },
+    {
+  name: 'Bybit',
+  fee: 0.10,
+  getPrice: async (pair) => {
+    const r = await axios.get(
+      `https://api.bybit.com/v5/market/tickers?category=spot&symbol=${pair}USDT`,
+      { timeout: 5000 }
+    );
+
+    const list = r.data?.result?.list;
+    if (!list || list.length === 0) return null;
+
+    return parseFloat(list[0].lastPrice);
+  }
+},
   {
     name: 'KuCoin',
     fee: 0.10,
@@ -75,14 +85,21 @@ const exchanges = [
     }
   },
   {
-    name: 'OKX',
-    fee: 0.10,
-    getPrice: async (pair) => {
-      const r = await axios.get(
-        `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`, { timeout: 5000 });
-      return parseFloat(r.data.data[0].last);
-    }
-  },
+    {
+  name: 'OKX',
+  fee: 0.10,
+  getPrice: async (pair) => {
+    const r = await axios.get(
+      `https://www.okx.com/api/v5/market/ticker?instId=${pair}-USDT`,
+      { timeout: 5000 }
+    );
+
+    const data = r.data?.data;
+    if (!data || data.length === 0) return null;
+
+    return parseFloat(data[0].last);
+  }
+},
   {
     name: 'Kraken',
     fee: 0.26,
@@ -154,17 +171,29 @@ app.get('/arbitragem', async (req, res) => {
       const diff = ((max.price - min.price) / min.price) * 100;
       const realProfit = diff - (min.fee + max.fee);
 
-      if (realProfit >= MIN_PROFIT) {
-        opportunities.push({
-          pair,
-          buy: min.name,
-          sell: max.name,
-          buyPrice: min.price,
-          sellPrice: max.price,
-          spread: diff,
-          profit: realProfit
-        });
-      }
+  if (realProfit >= MIN_PROFIT) {
+    const opportunity = {
+      pair,
+      buy: min.name,
+      sell: max.name,
+      buyPrice: min.price,
+      sellPrice: max.price,
+      spread: diff,
+      profit: realProfit,
+      time: new Date().toISOString()
+  };
+
+  opportunities.push(opportunity);
+
+  // 🔥 SALVAR NO HISTÓRICO
+  history.unshift(opportunity);
+
+  // limitar tamanho
+  if (history.length > MAX_HISTORY) {
+    history.pop();
+  }
+}
+
     }
 
         // 🔥 ORDENAR POR MAIOR LUCRO
@@ -181,6 +210,11 @@ app.get('/arbitragem', async (req, res) => {
     res.status(500).json({ error: 'Erro no backend' });
   }
 });
+
+app.get('/historico', (req, res) => {
+  res.json(history);
+});
+
 
 // ===== START =====
 const PORT = process.env.PORT || 3000;
