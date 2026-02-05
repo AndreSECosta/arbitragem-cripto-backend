@@ -7,6 +7,14 @@ const app = express();
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
+let cache = {
+  data: null,
+  timestamp: 0
+};
+
+const CACHE_TIME = 30 * 1000; // 30 segundos
+
+
 // ===== CONFIG =====
 const PAIRS = [
   'BTC',
@@ -127,6 +135,13 @@ async function getPrices(pair) {
 // ===== ROTA =====
 app.get('/arbitragem', async (req, res) => {
   try {
+    const now = Date.now();
+
+    // 🔥 SE CACHE AINDA É VÁLIDO
+    if (cache.data && now - cache.timestamp < CACHE_TIME) {
+      return res.json(cache.data);
+    }
+
     const opportunities = [];
 
     for (const pair of PAIRS) {
@@ -152,7 +167,13 @@ app.get('/arbitragem', async (req, res) => {
       }
     }
 
+        // 🔥 ORDENAR POR MAIOR LUCRO
     opportunities.sort((a, b) => b.profit - a.profit);
+
+    // 🔒 SALVAR NO CACHE
+    cache.data = opportunities;
+    cache.timestamp = now;
+
     res.json(opportunities);
 
   } catch (err) {
