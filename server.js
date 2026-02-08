@@ -165,26 +165,36 @@ app.get('/arbitragem', async (req, res) => {
     const opportunities = [];
 
     for (const pair of PAIRS) {
-      const prices = await getPrices(pair);
-      if (prices.length < 2) continue;
+  const prices = await getPrices(pair);
+  if (prices.length < 2) continue;
 
-      const min = prices.reduce((a,b)=>a.price<b.price?a:b);
-      const max = prices.reduce((a,b)=>a.price>b.price?a:b);
+  const min = prices.reduce((a,b)=>a.price<b.price?a:b);
+  const max = prices.reduce((a,b)=>a.price>b.price?a:b);
 
-      const diff = ((max.price - min.price) / min.price) * 100;
-      const realProfit = diff - (min.fee + max.fee);
+  const diff = ((max.price - min.price) / min.price) * 100;
+  const realProfit = diff - (min.fee + max.fee);
 
   if (realProfit >= MIN_PROFIT || DEBUG) {
-  opportunities.push({
-    pair,
-    buy: min.name,
-    sell: max.name,
-    buyPrice: min.price,
-    sellPrice: max.price,
-    spread: diff,
-    profit: realProfit,
-    time: new Date().toISOString()
-  });
+    const opportunity = {
+      pair,
+      buy: min.name,
+      sell: max.name,
+      buyPrice: min.price,
+      sellPrice: max.price,
+      spread: diff,
+      profit: realProfit,
+      time: new Date().toISOString()
+    };
+
+    opportunities.push(opportunity);
+
+    // 🔥 salvar no histórico
+    history.unshift(opportunity);
+
+    if (history.length > MAX_HISTORY) {
+      history.pop();
+    }
+  }
 }
 
   // 🔥 SALVAR NO HISTÓRICO
