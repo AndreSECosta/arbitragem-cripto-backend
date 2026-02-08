@@ -20,24 +20,14 @@ const MAX_HISTORY = 100;
 
 // ===== CONFIG =====
 const PAIRS = [
-  'BTC',
-  'ETH',
-  'SOL',
-  'XRP',
-  'ADA',
-  'AVAX',
-  'DOGE',
-  'LINK',
-  'MATIC',
-  'LTC',
-  'TRX',
-  'DOT',
-  'ATOM',
-  'BNB',
-  'UNI'
+  'BTC','ETH','SOL','XRP','ADA','DOGE',
+  'LTC','AVAX','LINK','DOT','ATOM','UNI',
+  'AAVE','SAND','MANA','APE','NEAR',
+  'FIL','ETC','ICP','HBAR','EGLD',
+  'GALA','ROSE','IMX','ARB','OP'
 ];
-
-const MIN_PROFIT = 0.3;
+const MIN_PROFIT = 0.1;
+const DEBUG = true;
 
 // ===== EXCHANGES =====
 const exchanges = [
@@ -184,19 +174,18 @@ app.get('/arbitragem', async (req, res) => {
       const diff = ((max.price - min.price) / min.price) * 100;
       const realProfit = diff - (min.fee + max.fee);
 
-  if (realProfit >= MIN_PROFIT) {
-    const opportunity = {
-      pair,
-      buy: min.name,
-      sell: max.name,
-      buyPrice: min.price,
-      sellPrice: max.price,
-      spread: diff,
-      profit: realProfit,
-      time: new Date().toISOString()
-  };
-
-  opportunities.push(opportunity);
+  if (realProfit >= MIN_PROFIT || DEBUG) {
+  opportunities.push({
+    pair,
+    buy: min.name,
+    sell: max.name,
+    buyPrice: min.price,
+    sellPrice: max.price,
+    spread: diff,
+    profit: realProfit,
+    time: new Date().toISOString()
+  });
+}
 
   // 🔥 SALVAR NO HISTÓRICO
   history.unshift(opportunity);
