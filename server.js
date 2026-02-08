@@ -157,7 +157,7 @@ app.get('/arbitragem', async (req, res) => {
   try {
     const now = Date.now();
 
-    // 🔥 SE CACHE AINDA É VÁLIDO
+    // 🔥 CACHE
     if (cache.data && now - cache.timestamp < CACHE_TIME) {
       return res.json(cache.data);
     }
@@ -165,53 +165,39 @@ app.get('/arbitragem', async (req, res) => {
     const opportunities = [];
 
     for (const pair of PAIRS) {
-  const prices = await getPrices(pair);
-  if (prices.length < 2) continue;
+      const prices = await getPrices(pair);
+      if (prices.length < 2) continue;
 
-  const min = prices.reduce((a,b)=>a.price<b.price?a:b);
-  const max = prices.reduce((a,b)=>a.price>b.price?a:b);
+      const min = prices.reduce((a, b) => a.price < b.price ? a : b);
+      const max = prices.reduce((a, b) => a.price > b.price ? a : b);
 
-  const diff = ((max.price - min.price) / min.price) * 100;
-  const realProfit = diff - (min.fee + max.fee);
+      const diff = ((max.price - min.price) / min.price) * 100;
+      const realProfit = diff - (min.fee + max.fee);
 
-  if (realProfit >= MIN_PROFIT || DEBUG) {
-    const opportunity = {
-      pair,
-      buy: min.name,
-      sell: max.name,
-      buyPrice: min.price,
-      sellPrice: max.price,
-      spread: diff,
-      profit: realProfit,
-      time: new Date().toISOString()
-    };
+      if (realProfit >= MIN_PROFIT || DEBUG) {
+        const opportunity = {
+          pair,
+          buy: min.name,
+          sell: max.name,
+          buyPrice: min.price,
+          sellPrice: max.price,
+          spread: diff,
+          profit: realProfit,
+          time: new Date().toISOString()
+        };
 
-    opportunities.push(opportunity);
+        opportunities.push(opportunity);
 
-    // 🔥 salvar no histórico
-    history.unshift(opportunity);
-
-    if (history.length > MAX_HISTORY) {
-      history.pop();
-    }
-  }
-}
-
-  // 🔥 SALVAR NO HISTÓRICO
-  history.unshift(opportunity);
-
-  // limitar tamanho
-  if (history.length > MAX_HISTORY) {
-    history.pop();
-  }
-}
-
+        // histórico
+        history.unshift(opportunity);
+        if (history.length > MAX_HISTORY) {
+          history.pop();
+        }
+      }
     }
 
-        // 🔥 ORDENAR POR MAIOR LUCRO
     opportunities.sort((a, b) => b.profit - a.profit);
 
-    // 🔒 SALVAR NO CACHE
     cache.data = opportunities;
     cache.timestamp = now;
 
@@ -226,7 +212,6 @@ app.get('/arbitragem', async (req, res) => {
 app.get('/historico', (req, res) => {
   res.json(history);
 });
-
 
 // ===== START =====
 const PORT = process.env.PORT || 3000;
