@@ -27,7 +27,7 @@ const PAIRS = [
   'GALA','ROSE','IMX','ARB','OP'
 ];
 const MIN_PROFIT = 0.1;
-const DEBUG = true;
+const DEBUG = false;
 
 // ===== EXCHANGES =====
 const exchanges = [
